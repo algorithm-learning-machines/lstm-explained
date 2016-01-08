@@ -1,8 +1,9 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
+\usepackage{amsmath}
 
 \title{LSTM: From theory to practice}
-\author{Adrian Mihai Iosig, Matei Macri, Tudor Berariu}
+\author{Adrian Mihai Iosif, Matei Macri, Tudor Berariu}
 \date{January 2016}
 
 \begin{document}
@@ -11,7 +12,35 @@
 
 \section{Introduction}
 
+\paragraph{Conventions}
+\begin{itemize}
+    \item $g_{*}$ - gates
+    \item $z_{c}$ / $z_h$ - input / output values
+    \item $\mathbf{w}_{*}$ - weights (parameters)
+    \item $f_{*}$ - activation functions (e.g. logistic)
+    \item $\mathbf{x}$ - inputs
+\end{itemize}
+
 \section{The Forward Phase}
+
+\paragraph{Input gate and input value}
+
+$$g_{\iota}^{(t)} = f_{\iota}\left(\mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]\right)$$
+$$z_{c}^{(t)} = f_{c}\left(\mathbf{w}_{c}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right]\right)$$
+
+\paragraph{Forget gate}
+
+$$g_{\phi}^{(t)} = f_{\phi}\left(\mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]\right)$$
+
+\paragraph{Cell value}
+
+$$s_c^{(t)} = g_{\phi}^{(t)} s_c^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}$$
+
+\paragraph{Output gate and output value}
+
+$$g_{\omega}^{(t)} = f_{\omega}\left(\mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t)}; 1\right]\right)$$
+
+$$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s_c^{(t)}\right)$$
 
 \section{The Backward Phase}
 
