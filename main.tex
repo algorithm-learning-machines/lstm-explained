@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 
@@ -25,12 +25,19 @@
 
 \paragraph{Input gate and input value}
 
-$$g_{\iota}^{(t)} = f_{\iota}\left(\mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]\right)$$
-$$z_{c}^{(t)} = f_{c}\left(\mathbf{w}_{c}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right]\right)$$
+$$a_{\iota}^{(t)} = \mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]$$
+$$g_{\iota}^{(t)} = f_{\iota}\left(a_{\iota}^{(t)}\right)$$
+
+\begin{center}\rule[0.5ex]{.3\linewidth}{1pt}\end{center}
+
+$$a_{c}^{(t)} = \mathbf{w}_{c}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right]$$
+$$z_{c}^{(t)} = f_{c}\left(a_{c}^{(t)}\right)$$
 
 \paragraph{Forget gate}
 
-$$g_{\phi}^{(t)} = f_{\phi}\left(\mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]\right)$$
+$$a_{\phi}^{(t)} = \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]$$
+
+$$g_{\phi}^{(t)} = f_{\phi}\left(a_{\phi}^{(t)}\right)$$
 
 \paragraph{Cell value}
 
@@ -38,11 +45,18 @@ $$s_c^{(t)} = g_{\phi}^{(t)} s_c^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}$$
 
 \paragraph{Output gate and output value}
 
-$$g_{\omega}^{(t)} = f_{\omega}\left(\mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t)}; 1\right]\right)$$
+$$a_{\omega}^{(t)} = \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t)}; 1\right]$$
+$$g_{\omega}^{(t)} = f_{\omega}\left(a_{\omega}^{(t)}\right)$$
 
 $$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s_c^{(t)}\right)$$
 
 \section{The Backward Phase}
+
+$\displaystyle\frac{\partial E}{\partial z_h^{(t)}}$ is given and $\displaystyle \frac{\partial E}{\partial W_{*}}$, $\displaystyle \frac{\partial E}{\partial \mathbf{x}^{(t)}}$, and $\displaystyle \frac{\partial E}{\partial z_{h}^{(t-1)}}$ need to be computed.
+
+$$\delta_{h} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_h^{(t)}}$$
+
+$$\boldsymbol{\delta}_{\omega} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \mathbf{w}_{\omega}} = \displaystyle \frac{\partial E}{\partial z_h^{(t)}} \cdot \displaystyle \frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} \cdot \displaystyle \frac{\partial g_{\omega}^{(t)}}{\partial \mathbf{w}_{\omega}} = \delta_h \cdot f'(g_{\omega}^{(t)} s_c^{(t)}) $$
 
 \appendix
 \section{Bibliography}
