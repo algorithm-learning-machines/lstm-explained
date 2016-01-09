@@ -4,6 +4,9 @@
 \usepackage{graphicx}
 \usepackage{import}
 \usepackage{color}
+\usepackage[margin=1in]{geometry}
+
+\definecolor{auburn}{rgb}{0.43, 0.21, 0.1}
 
 \title{LSTM: From theory to practice}
 \author{Adrian Mihai Iosif, Matei Macri, Tudor Berariu}
@@ -22,15 +25,20 @@
     \item $\mathbf{w}_{*}$ - weights (parameters)
     \item $f_{*}$ - activation functions (e.g. logistic)
     \item $\mathbf{x}$ - inputs
+    \item $s$ - a scalar value (the actual memory of the LSTM cell)
 \end{itemize}
 
 We use a simplified notation for the vertical concatenation of two vectors $\mathbf{a}$, $\mathbf{b}$: $\left[\mathbf{a}; \mathbf{b}\right]$ instead of $\left[ \mathbf{a}^{\text{T}} ; \mathbf{b}^{\text{T}} \right]^{\text{T}}$.
+
+\begin{center}
+\input{lstm_variables.pdf_tex}
+\end{center}
 
 \section{The Forward Phase}
 
 \paragraph{Input gate and input value.}
 
-$$a_{\iota}^{(t)} = \mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]$$
+$$a_{\iota}^{(t)} = \mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$$
 $$g_{\iota}^{(t)} = f_{\iota}\left(a_{\iota}^{(t)}\right)$$
 
 \begin{center}\rule[0.5ex]{.3\linewidth}{1pt}\end{center}
@@ -40,63 +48,87 @@ $$z_{c}^{(t)} = f_{c}\left(a_{c}^{(t)}\right)$$
 
 \paragraph{Forget gate.} This is actually a \emph{keep} gate:
 
-$$a_{\phi}^{(t)} = \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t-1)}; 1\right]$$
+$$a_{\phi}^{(t)} = \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$$
 
 $$g_{\phi}^{(t)} = f_{\phi}\left(a_{\phi}^{(t)}\right)$$
 
 \paragraph{Cell value.}
 
-$$s_c^{(t)} = g_{\phi}^{(t)} s_c^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}$$
+$$s^{(t)} = g_{\phi}^{(t)} s^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}$$
 
 \paragraph{Output gate and output value.}
 
-$$a_{\omega}^{(t)} = \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t)}; 1\right]$$
+$$a_{\omega}^{(t)} = \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right]$$
 $$g_{\omega}^{(t)} = f_{\omega}\left(a_{\omega}^{(t)}\right)$$
 
-$$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s_c^{(t)}\right)$$
+$$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s^{(t)}\right)$$
 
 \section{The Backward Phase}
 
+\paragraph{Notations.} In what follows the following notations are used for various partial derivatives:
+
 \begin{center}
-\input{lstm_variables.pdf_tex}
+\begin{tabular}{c c}
+    $\boldsymbol{\delta}_{x}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial z_h^{(t)}}\displaystyle\frac{\partial z_h^{(t)}} {\partial \mathbf{x}^{(t)}}$; &
+    $\delta_{zz}^{(t)\rightarrow(t-1)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial z_h^{(t)}}\displaystyle\frac{\partial z_h^{(t)}} {\partial z_h^{(t-1)}}$; \\[20pt]
+\end{tabular}
+\begin{tabular}{c c c}
+    $\delta_{s}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial s^{(t)}}$; &
+    $\delta_{c}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial z_c^{(t)}}$; &
+    $\delta_{h}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial z_h^{(t)}}$;  \\[20pt]
+    $\delta_{g_{\omega}}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial g_{\omega}^{(t)}}$; &
+    $\delta_{g_{\phi}}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial g_{\phi}^{(t)}}$; &
+    $\delta_{g_{\iota}}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial g_{\iota}^{(t)}}$ \\[20pt]
+    $\boldsymbol{\delta}_{\omega}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\omega}}$; &
+    $\boldsymbol{\delta}_{\phi}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\phi}}$; &
+    $\boldsymbol{\delta}_{\iota}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\iota}}$
+\end{tabular}
 \end{center}
 
-Before computing the needed gradients, let's take a closer look to $\displaystyle \frac{\partial E}{\partial s_c^{(t)}}$:
+\paragraph{Inner loops.} Before computing the needed gradients, let's take a closer look at $\displaystyle \frac{\partial E}{\partial s^{(t)}}$:
 
 \begin{equation}
-    \displaystyle\frac{\partial E}{\partial s_c^{(t)}} =
-    \displaystyle\frac{\partial E}{\partial z_h^{(t)}}
-    \displaystyle\frac{\partial z_h^{(t)}}{\partial s_c^{(t)}} +
-    \displaystyle\frac{\partial E}{\partial s_c^{(t+1)}}
-    \displaystyle\frac{\partial s_c^{(t+1)}}{\partial s_c^{(t)}}
+\begin{split}
+    \delta_{s}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial s^{(t)}} = &
+    {\color{blue} \displaystyle\frac{\partial E}{\partial z_h^{(t)}}
+    \displaystyle\frac{\partial z_h^{(t)}}{\partial s^{(t)}}} +
+    {\color{auburn}\displaystyle\frac{\partial E}{\partial g_{\phi}^{(t+1)}}
+    \displaystyle\frac{\partial g_{\phi}^{(t+1)}}{\partial s^{(t)}} +
+    \displaystyle\frac{\partial E}{\partial g_{\iota}^{(t+1)}}
+    \displaystyle\frac{\partial g_{\iota}^{(t+1)}}{\partial s^{(t)}} +
+    \displaystyle\frac{\partial E}{\partial s^{(t+1)}}
+    \displaystyle\frac{\partial s^{(t+1)}}{\partial s^{(t)}}} \\
+    = & {\color{blue} \delta_{h}^{(t)} f_{\omega}'(g_{\omega}^{(t)}s^{(t)}) g_{\omega}^{(t)}} +
+        {\color{auburn}\delta_{g_{\phi}}^{(t+1)}f_{\phi}'(a_{\phi}^{(t+1)})w_{\phi, s} +
+        \delta_{g_{\iota}}^{(t+1)}f_{\iota}'(a_{\iota}^{(t+1)})w_{\iota, s} +
+        \delta_{s}^{(t+1)}g_{\phi}^{(t+1)}} \\
+    = & {\color{blue}\delta^{(t) \rightarrow (t)}_s} +
+        {\color{auburn}\delta^{(t+1) \rightarrow (t)}_s}
+\end{split}
 \end{equation}
 
-\paragraph{Goal.}
-Given the error derivatives of the error with respect to the output $z_h^{(t)}$ and with respect to $s_c^{(t)}$: \begin{enumerate}
-    \item $\displaystyle\frac{\partial E}{\partial z_h^{(t)}}$
-    \item $\displaystyle\frac{\partial E^{(\tau > t)}}{\partial s_c^{(t)}}$
-\end{enumerate}, and  are given and $\displaystyle \frac{\partial E}{\partial W_{*}}$, $\displaystyle \frac{\partial E}{\partial \mathbf{x}^{(t)}}$, $\displaystyle \frac{\partial E}{\partial z_{h}^{(t-1)}}$, and $\displaystyle \frac{\partial E^{(t)}}{\partial s_c^{(t-1)}}$ need to be computed.
+\paragraph{Goal.} Given $\delta_h^{(t)}$, and $\delta^{(t+1) \rightarrow (t)}_s$, the following derivatives need to be computed: $\displaystyle \frac{\partial E}{\partial W_{*}}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^{(t)\rightarrow(t-1)}$, and $\delta^{(t) \rightarrow (t-1)}_s$.
 
 \paragraph{Order of computation.}
-Gradients need to be computed in the following order:
+Gradients need to be computed in the following order: $\delta_{g_{\omega}}^{(t)}$, $\boldsymbol{\delta}_{\omega}^{(t)}$, $\delta_s^{(t) \rightarrow (t)}$, $\delta_s^{(t)}$, $\delta_c^{(t)}$, $\delta_{g_{\iota}}$, $\boldsymbol{\delta}_{\iota}^{(t)}$, $\delta_{g_{\phi}}$, $\boldsymbol{\delta}_{\phi}^{(t)}$,
+$\delta_s^{(t) \rightarrow (t-1)}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^{(t)\rightarrow(t-1)}$.
 
 \begin{enumerate}
-    \item $\displaystyle \frac{\partial E}{\partial \mathbf{w}_{\omega}}$, $\displaystyle \frac{\partial E}{\partial s_c^{(t)}}$;
-    \item $\displaystyle \frac{\partial E}{\partial z_c^{(t)}}$ ;
-    \item $\displaystyle \frac{\partial E}{\partial \mathbf{w}_{\phi}}$, $\displaystyle \frac{\partial E}{\partial \mathbf{w}_{\iota}}$, $\displaystyle \frac{\partial E}{\partial \mathbf{w}_{c}}$;
-    \item $\displaystyle \frac{\partial E}{\partial \mathbf{x}^{(t)}}$, $\displaystyle \frac{\partial E}{\partial \mathbf{z}_h^{(t-1)}}$, $\displaystyle \frac{\partial E}{\partial \mathbf{s}_c^{(t-1)}}$
+    \item $\delta_{g_{\omega}}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\omega}^{(t)}} = \displaystyle \frac{\partial E}{\partial z_{h}^{(t)}} \displaystyle \frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} = \delta_h^{(t)}f_h'\left(g_{\omega}^{(t)}s^{(t)}\right)s^{(t)}$
+    \item $\boldsymbol{\delta}_{\omega}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\omega}^{(t)}} \displaystyle \frac{\partial g_{\omega}^{(t)}}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \delta_{g_{\omega}}^{(t)} f_{\omega}'\left(a_{\omega}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right]$
+    \item $\delta_s^{(t)\rightarrow(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_h^{(t)}}  \displaystyle \frac{\partial z_h^{(t)}}{s^{(t)}} = \delta_{h}^{(t)} f_{\omega}'(g_{\omega}^{(t)}s^{(t)}) g_{\omega}^{(t)}$
+    \item $\delta_s^{(t)} \overset{\text{not.}}{=} \delta^{(t) \rightarrow (t)}_s + \delta^{(t+1) \rightarrow (t)}_s$
+    \item $\delta_c^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_c^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{z_c^{(t)}} = \delta_s^{(t)} g_i^{(t)}$
+    \item $\delta_{g_{\iota}}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\iota}^{(t)}} = \delta_s^{(t)} z_c^{(t)}$
+    \item $\boldsymbol{\delta}_{\iota}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} \displaystyle \frac{\partial g_{\iota}^{(t)}}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\iota}'\left(a_{\iota}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$
+    \item $\delta_{g_{\phi}}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\phi}^{(t)}} = \delta_s^{(t)} s^{(t-1)}$
+    \item $\boldsymbol{\delta}_{\phi}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} \displaystyle \frac{\partial g_{\phi}^{(t)}}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\phi}'\left(a_{\phi}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$
+    \item $\delta^{(t) \rightarrow (t-1)}_s = \delta_{g_{\phi}}^{(t)}f_{\phi}'(a_{\phi}^{(t)})w_{\phi, s} +
+        \delta_{g_{\iota}}^{(t)}f_{\iota}'(a_{\iota}^{(t)})w_{\iota, s} +
+        \delta_{s}^{(t)}g_{\phi}^{(t)}$
+    \item
+    \item
 \end{enumerate}
-
-\paragraph{Output gradient.}$$\delta_{h} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_h^{(t)}}$$
-
-\paragraph{Output gate parameters gradient.}
-\begin{align*}
-    \boldsymbol{\delta}_{\omega} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \mathbf{w}_{\omega}} =& \displaystyle \frac{\partial E}{\partial z_h^{(t)}} \cdot \displaystyle \frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} \cdot \displaystyle \frac{\partial g_{\omega}^{(t)}}{\partial a_{\omega}^{(t)}} \cdot \displaystyle \frac{\partial a_{\omega}^{(t)}}{\partial \mathbf{w}_{\omega}} \\ =& \delta_h \cdot f_h'\left(g_{\omega}^{(t)} s_c^{(t)}\right) \cdot f_{\omega}'\left(a_{\omega}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s_c^{(t)}; 1\right]
-\end{align*}
-
-\begin{align*}
-    \displaystyle
-\end{align*}
 
 \appendix
 \section{Bibliography}
