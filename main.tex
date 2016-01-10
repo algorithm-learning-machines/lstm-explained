@@ -6,6 +6,9 @@
 \usepackage{color}
 \usepackage[margin=1in]{geometry}
 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{lstm.bib}
+
 \definecolor{auburn}{rgb}{0.43, 0.21, 0.1}
 
 \title{LSTM: From theory to practice}
@@ -18,9 +21,11 @@
 
 \section{Introduction}
 
-This document is a full guide to implementing a LSTM cell in Torch. The document has two parts. In the first part the full mathematics of the model for both the forward phase and the backward phase are being detailed. In the second part we provide a step by step implementation in Torch.
+This document is a both a resource for understanding the mathematics of LSTM (Section~\ref{sec:math}) and a tutorial containing a step by step implementation in Torch (Section~\ref{sec:torch}).
+The LSTM module was first introduced in \cite{hochreiter1997long}. It solves the \emph{vanishing gradient} problem that makes training vanilla RNNs difficult.
 
 \section{Mathematical foundations}
+\label{sec:math}
 
 \paragraph{Conventions.} We propose the following notation for the variables:
 \begin{itemize}
@@ -169,8 +174,10 @@ $\delta_s^{(t) \rightarrow (t-1)}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^
 \end{equation}
 
 \section{Torch Implementation}
+\label{sec:torch}
 
 \appendix
-\section{Bibliography}
+
+\printbibliography
 
 \end{document}
