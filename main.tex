@@ -18,6 +18,10 @@
 
 \section{Introduction}
 
+This document is a full guide to implementing a LSTM cell in Torch. The document has two parts. In the first part the full mathematics of the model for both the forward phase and the backward phase are being detailed. In the second part we provide a step by step implementation in Torch.
+
+\section{Mathematical foundations}
+
 \paragraph{Conventions.} We propose the following notation for the variables:
 \begin{itemize}
     \item $g_{*}$ - gates
@@ -34,36 +38,42 @@ We use a simplified notation for the vertical concatenation of two vectors $\mat
 \input{lstm_variables.pdf_tex}
 \end{center}
 
-\section{The Forward Phase}
+\subsection{The Forward Phase}
 
 \paragraph{Input gate and input value.}
 
-$$a_{\iota}^{(t)} = \mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$$
-$$g_{\iota}^{(t)} = f_{\iota}\left(a_{\iota}^{(t)}\right)$$
+\begin{align}
+a_{\iota}^{(t)} &= \mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
+g_{\iota}^{(t)} &= f_{\iota}\left(a_{\iota}^{(t)}\right)
+\end{align}
 
-\begin{center}\rule[0.5ex]{.3\linewidth}{1pt}\end{center}
-
-$$a_{c}^{(t)} = \mathbf{w}_{c}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right]$$
-$$z_{c}^{(t)} = f_{c}\left(a_{c}^{(t)}\right)$$
+\begin{align}
+a_{c}^{(t)} &= \mathbf{w}_{c}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right] \\
+z_{c}^{(t)} &= f_{c}\left(a_{c}^{(t)}\right)
+\end{align}
 
 \paragraph{Forget gate.} This is actually a \emph{keep} gate:
 
-$$a_{\phi}^{(t)} = \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$$
-
-$$g_{\phi}^{(t)} = f_{\phi}\left(a_{\phi}^{(t)}\right)$$
+\begin{align}
+a_{\phi}^{(t)} &= \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
+g_{\phi}^{(t)} &= f_{\phi}\left(a_{\phi}^{(t)}\right)
+\end{align}
 
 \paragraph{Cell value.}
 
-$$s^{(t)} = g_{\phi}^{(t)} s^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}$$
+\begin{equation}
+    s^{(t)} = g_{\phi}^{(t)} s^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}
+\end{equation}
 
 \paragraph{Output gate and output value.}
 
-$$a_{\omega}^{(t)} = \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right]$$
-$$g_{\omega}^{(t)} = f_{\omega}\left(a_{\omega}^{(t)}\right)$$
+\begin{align}
+a_{\omega}^{(t)} &= \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right] \\
+g_{\omega}^{(t)} &= f_{\omega}\left(a_{\omega}^{(t)}\right) \\
+z_h^{(t)} &= f_h\left(g_{\omega}^{(t)} s^{(t)}\right)
+\end{align}
 
-$$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s^{(t)}\right)$$
-
-\section{The Backward Phase}
+\subsection{The Backward Phase}
 
 \paragraph{Notations.} In what follows the following notations are used for various partial derivatives:
 
@@ -85,7 +95,7 @@ $$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s^{(t)}\right)$$
 \end{tabular}
 \end{center}
 
-\paragraph{Inner loops.} Before computing the needed gradients, let's take a closer look at $\displaystyle \frac{\partial E}{\partial s^{(t)}}$:
+\paragraph{Inner loops.} Before computing the needed gradients, let's take a closer look at $\frac{\partial E}{\partial s^{(t)}}$. This gradient has two components. The first corresponds to the error flowing through $z_h^{(t)}$ and the second corresponds to the inner loops of the LSTM (the connections to $g_{\iota}^{(t+1)}$, $g_{\phi}^{(t+1)}$, and $s^{(t+1)}$).
 
 \begin{equation}
 \begin{split}
@@ -113,22 +123,52 @@ $$z_h^{(t)} = f_h\left(g_{\omega}^{(t)} s^{(t)}\right)$$
 Gradients need to be computed in the following order: $\delta_{g_{\omega}}^{(t)}$, $\boldsymbol{\delta}_{\omega}^{(t)}$, $\delta_s^{(t) \rightarrow (t)}$, $\delta_s^{(t)}$, $\delta_c^{(t)}$, $\delta_{g_{\iota}}$, $\boldsymbol{\delta}_{\iota}^{(t)}$, $\delta_{g_{\phi}}$, $\boldsymbol{\delta}_{\phi}^{(t)}$,
 $\delta_s^{(t) \rightarrow (t-1)}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^{(t)\rightarrow(t-1)}$.
 
-\begin{enumerate}
-    \item $\delta_{g_{\omega}}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\omega}^{(t)}} = \displaystyle \frac{\partial E}{\partial z_{h}^{(t)}} \displaystyle \frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} = \delta_h^{(t)}f_h'\left(g_{\omega}^{(t)}s^{(t)}\right)s^{(t)}$
-    \item $\boldsymbol{\delta}_{\omega}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\omega}^{(t)}} \displaystyle \frac{\partial g_{\omega}^{(t)}}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \delta_{g_{\omega}}^{(t)} f_{\omega}'\left(a_{\omega}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right]$
-    \item $\delta_s^{(t)\rightarrow(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_h^{(t)}}  \displaystyle \frac{\partial z_h^{(t)}}{s^{(t)}} = \delta_{h}^{(t)} f_{\omega}'(g_{\omega}^{(t)}s^{(t)}) g_{\omega}^{(t)}$
-    \item $\delta_s^{(t)} \overset{\text{not.}}{=} \delta^{(t) \rightarrow (t)}_s + \delta^{(t+1) \rightarrow (t)}_s$
-    \item $\delta_c^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_c^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{z_c^{(t)}} = \delta_s^{(t)} g_i^{(t)}$
-    \item $\delta_{g_{\iota}}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\iota}^{(t)}} = \delta_s^{(t)} z_c^{(t)}$
-    \item $\boldsymbol{\delta}_{\iota}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} \displaystyle \frac{\partial g_{\iota}^{(t)}}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\iota}'\left(a_{\iota}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$
-    \item $\delta_{g_{\phi}}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\phi}^{(t)}} = \delta_s^{(t)} s^{(t-1)}$
-    \item $\boldsymbol{\delta}_{\phi}^{(t)} \overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} \displaystyle \frac{\partial g_{\phi}^{(t)}}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\phi}'\left(a_{\phi}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right]$
-    \item $\delta^{(t) \rightarrow (t-1)}_s = \delta_{g_{\phi}}^{(t)}f_{\phi}'(a_{\phi}^{(t)})w_{\phi, s} +
+\begin{align}
+    \delta_{g_{\omega}}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\omega}^{(t)}} = \displaystyle \frac{\partial E}{\partial z_{h}^{(t)}} \displaystyle \frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} = \delta_h^{(t)}f_h'\left(g_{\omega}^{(t)}s^{(t)}\right)s^{(t)} \\
+    \boldsymbol{\delta}_{\omega}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\omega}^{(t)}} \displaystyle \frac{\partial g_{\omega}^{(t)}}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \delta_{g_{\omega}}^{(t)} f_{\omega}'\left(a_{\omega}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right] \\
+    \delta_s^{(t)\rightarrow(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_h^{(t)}}  \displaystyle \frac{\partial z_h^{(t)}}{s^{(t)}} = \delta_{h}^{(t)} f_{\omega}'(g_{\omega}^{(t)}s^{(t)}) g_{\omega}^{(t)} \\
+    \delta_s^{(t)} &\overset{\text{not.}}{=} \delta^{(t) \rightarrow (t)}_s + \delta^{(t+1) \rightarrow (t)}_s \\
+    \delta_c^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_c^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{z_c^{(t)}} = \delta_s^{(t)} g_i^{(t)} \\
+    \delta_{g_{\iota}}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\iota}^{(t)}} = \delta_s^{(t)} z_c^{(t)} \\
+    \boldsymbol{\delta}_{\iota}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} \displaystyle \frac{\partial g_{\iota}^{(t)}}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\iota}'\left(a_{\iota}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
+    \delta_{g_{\phi}}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\phi}^{(t)}} = \delta_s^{(t)} s^{(t-1)} \\
+    \boldsymbol{\delta}_{\phi}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} \displaystyle \frac{\partial g_{\phi}^{(t)}}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\phi}'\left(a_{\phi}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
+    \delta^{(t) \rightarrow (t-1)}_s &= \delta_{g_{\phi}}^{(t)}f_{\phi}'(a_{\phi}^{(t)})w_{\phi, s} +
         \delta_{g_{\iota}}^{(t)}f_{\iota}'(a_{\iota}^{(t)})w_{\iota, s} +
-        \delta_{s}^{(t)}g_{\phi}^{(t)}$
-    \item
-    \item
-\end{enumerate}
+        \delta_{s}^{(t)}g_{\phi}^{(t)}
+\end{align}
+
+\begin{equation}
+\begin{split}
+    \boldsymbol{\delta}_x^{(t)} &\overset{\text{not.}}{=} \displaystyle\frac{\partial E}{\partial z_h^{(t)}}  \displaystyle\frac{\partial z_h^{(t)}}{\partial \mathbf{x}^{(t)}} \\
+    &= \displaystyle\frac{\partial E}{\partial z_h^{(t)}} \left(
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial g_{\iota}^{(t)}} \displaystyle\frac{\partial g_{\iota}^{(t)}}{\partial \mathbf{x}^{(t)}} +
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial g_{\phi}^{(t)}} \displaystyle\frac{\partial g_{\phi}^{(t)}}{\partial \mathbf{x}^{(t)}} +
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} \displaystyle\frac{\partial g_{\omega}^{(t)}}{\partial \mathbf{x}^{(t)}} +
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial z_{c}^{(t)}} \displaystyle\frac{\partial z_{c}^{(t)}}{\partial \mathbf{x}^{(t)}} \right)\\
+            &= \delta_{g_{\iota}}^{(t)} f'_{\iota}\left(a_{\iota}^{(t)}\right) \mathbf{w}_{\iota, x} +
+               \delta_{g_{\phi}}^{(t)} f'_{\phi}\left(a_{\phi}^{(t)}\right) \mathbf{w}_{\phi, x} +
+               \delta_{g_{\omega}}^{(t)} f'_{\omega}\left(a_{\omega}^{(t)}\right) \mathbf{w}_{\omega, x} +
+               \delta_{c}^{(t)} f'_{c}\left(a_{c}^{(t)}\right) \mathbf{w}_{c, x}
+\end{split}    
+\end{equation}
+
+\begin{equation}
+\begin{split}
+    \boldsymbol{\delta}_x^{(t)} &\overset{\text{not.}}{=} \displaystyle\frac{\partial E}{\partial z_h^{(t)}}  \displaystyle\frac{\partial z_h^{(t)}}{\partial z_h^{(t-1)}} \\
+    &= \displaystyle\frac{\partial E}{\partial z_h^{(t)}} \left(
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial g_{\iota}^{(t)}} \displaystyle\frac{\partial g_{\iota}^{(t)}}{\partial z_h^{(t-1)}} +
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial g_{\phi}^{(t)}} \displaystyle\frac{\partial g_{\phi}^{(t)}}{\partial z_h^{(t-1)}} +
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial g_{\omega}^{(t)}} \displaystyle\frac{\partial g_{\omega}^{(t)}}{\partial z_h^{(t-1)}} +
+            \displaystyle\frac{\partial z_h^{(t)}}{\partial z_{c}^{(t)}} \displaystyle\frac{\partial z_{c}^{(t)}}{\partial z_h^{(t-1)}} \right)\\
+            &= \delta_{g_{\iota}}^{(t)} f'_{\iota}\left(a_{\iota}^{(t)}\right) \mathbf{w}_{\iota, z} +
+               \delta_{g_{\phi}}^{(t)} f'_{\phi}\left(a_{\phi}^{(t)}\right) \mathbf{w}_{\phi, z} +
+               \delta_{g_{\omega}}^{(t)} f'_{\omega}\left(a_{\omega}^{(t)}\right) \mathbf{w}_{\omega, z} +
+               \delta_{c}^{(t)} f'_{c}\left(a_{c}^{(t)}\right) \mathbf{w}_{c, z}
+\end{split}    
+\end{equation}
+
+\section{Torch Implementation}
 
 \appendix
 \section{Bibliography}
