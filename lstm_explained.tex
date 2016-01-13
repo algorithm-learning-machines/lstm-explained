@@ -80,7 +80,7 @@ z_h^{(t)} &= f_h\left(g_{\omega}^{(t)} s^{(t)}\right)
 
 \subsection{The Backward Phase}
 
-\paragraph{Notations.} In what follows the following notations are used for various partial derivatives:
+\paragraph{Notations.} In what follows the next notations are used for various partial derivatives:
 
 \begin{center}
 \begin{tabular}{c c}
@@ -96,7 +96,8 @@ z_h^{(t)} &= f_h\left(g_{\omega}^{(t)} s^{(t)}\right)
     $\delta_{g_{\iota}}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial g_{\iota}^{(t)}}$ \\[20pt]
     $\boldsymbol{\delta}_{\omega}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\omega}}$; &
     $\boldsymbol{\delta}_{\phi}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\phi}}$; &
-    $\boldsymbol{\delta}_{\iota}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\iota}}$
+    $\boldsymbol{\delta}_{\iota}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{\iota}}$ \\[20pt]
+    $\boldsymbol{\delta}_{c}^{(t)} \overset{not.}{=} \displaystyle\frac{\partial E}{\partial \mathbf{w}_{c}}$
 \end{tabular}
 \end{center}
 
@@ -125,7 +126,7 @@ z_h^{(t)} &= f_h\left(g_{\omega}^{(t)} s^{(t)}\right)
 \paragraph{Goal.} Given $\delta_h^{(t)}$, and $\delta^{(t+1) \rightarrow (t)}_s$, the following derivatives need to be computed: $\displaystyle \frac{\partial E}{\partial W_{*}}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^{(t)\rightarrow(t-1)}$, and $\delta^{(t) \rightarrow (t-1)}_s$.
 
 \paragraph{Order of computation.}
-Gradients need to be computed in the following order: $\delta_{g_{\omega}}^{(t)}$, $\boldsymbol{\delta}_{\omega}^{(t)}$, $\delta_s^{(t) \rightarrow (t)}$, $\delta_s^{(t)}$, $\delta_c^{(t)}$, $\delta_{g_{\iota}}$, $\boldsymbol{\delta}_{\iota}^{(t)}$, $\delta_{g_{\phi}}$, $\boldsymbol{\delta}_{\phi}^{(t)}$,
+Gradients need to be computed in the following order: $\delta_{g_{\omega}}^{(t)}$, $\boldsymbol{\delta}_{\omega}^{(t)}$, $\delta_s^{(t) \rightarrow (t)}$, $\delta_s^{(t)}$, $\delta_c^{(t)}$, $\boldsymbol{\delta}_{c}^{(t)}$, $\delta_{g_{\iota}}$, $\boldsymbol{\delta}_{\iota}^{(t)}$, $\delta_{g_{\phi}}$, $\boldsymbol{\delta}_{\phi}^{(t)}$,
 $\delta_s^{(t) \rightarrow (t-1)}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^{(t)\rightarrow(t-1)}$.
 
 \begin{align}
@@ -134,6 +135,9 @@ $\delta_s^{(t) \rightarrow (t-1)}$, $\boldsymbol{\delta}_x^{(t)}$, $\delta_{zz}^
     \delta_s^{(t)\rightarrow(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_h^{(t)}}  \displaystyle \frac{\partial z_h^{(t)}}{s^{(t)}} = \delta_{h}^{(t)} f_{\omega}'\left(g_{\omega}^{(t)}s^{(t)}\right) g_{\omega}^{(t)} \\
     \delta_s^{(t)} &\overset{\text{not.}}{=} \delta^{(t) \rightarrow (t)}_s + \delta^{(t+1) \rightarrow (t)}_s \\
     \delta_c^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial z_c^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{z_c^{(t)}} = \delta_s^{(t)} g_i^{(t)} \\
+    \boldsymbol{\delta}_{c}^{(t)} &\overset{\text{not.}}{=}  \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{c}^{(t)}} = \displaystyle \frac{\partial E}{\partial z_c^{(t)}} \displaystyle \frac{\partial z_c^{(t)}} {\partial a_c^{(t)}}
+\frac{\partial a_c^{(t)}} {\partial \boldsymbol{w}_c^{(t)}}       
+    =  \delta_c^{(t)} f_{c}'\left(a_{c}^{(t)}\right)  \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right]\\
     \delta_{g_{\iota}}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\iota}^{(t)}} = \delta_s^{(t)} z_c^{(t)} \\
     \boldsymbol{\delta}_{\iota}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \displaystyle \frac{\partial E}{\partial g_{\iota}^{(t)}} \displaystyle \frac{\partial g_{\iota}^{(t)}}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\iota}'\left(a_{\iota}^{(t)}\right) \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
     \delta_{g_{\phi}}^{(t)} &\overset{\text{not.}}{=} \displaystyle \frac{\partial E}{\partial g_{\phi}^{(t)}} = \displaystyle \frac{\partial E}{\partial s^{(t)}}  \displaystyle \frac{\partial s^{(t)}}{g_{\phi}^{(t)}} = \delta_s^{(t)} s^{(t-1)} \\
