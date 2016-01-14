@@ -5,6 +5,8 @@
 \usepackage{import}
 \usepackage{color}
 \usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{lstm.bib}
@@ -28,14 +30,29 @@ The LSTM module was first introduced in \cite{hochreiter1997long} as a solution 
 \label{sec:math}
 
 \paragraph{Conventions.} We propose the following notation for the variables:
-\begin{itemize}
-    \item $g_{*}$ - gates
-    \item $z_{c}$ / $z_h$ - input / output values
-    \item $\mathbf{w}_{*}$ - weights (parameters)
-    \item $f_{*}$ - activation functions (e.g. logistic)
-    \item $\mathbf{x}$ - inputs
-    \item $s$ - a scalar value (the actual memory of the LSTM cell)
-\end{itemize}
+\begin{center}
+\begin{tabular}{c | l}
+    $D$ & memory cell dimension \\
+    $N$ & input vector size \\
+    \hline
+    $g_{\iota}\in \mathbb{R}$  & input gate \\
+    $g_{\phi}\in \mathbb{R}$  & forget gate \\
+    $g_{\omega}\in \mathbb{R}$  & output gate \\
+    \hline
+    $\mathbf{z}_{c} \in \mathbb{R}^{D}$ & input vector \\
+    $\mathbf{z}_h \in \mathbb{R}^{D}$ & output vector \\
+    \hline
+    $\mathbf{w}_{\iota} \in \mathbb{R}^{(N + 2D + 1)}$ & input gate parameters \\
+    $\mathbf{w}_{\phi} \in \mathbb{R}^{(N + 2D + 1)}$ & forget gate parameters \\
+    $\mathbf{w}_{\omega} \in \mathbb{R}^{(N + 2D + 1)}$ & output gate parameters \\
+    $\mathbf{W}_{c} \in \mathbb{R}^{(N + D + 1)\times D}$ & input vector parameters \\
+    \hline
+    $f_{*}$ & activation functions (e.g. logistic) \\
+    \hline
+    $\mathbf{x} \in \mathbb{R}^{N}$ & inputs \\
+    $\mathbf{s} \in \mathbb{R}^{D}$ & the actual memory of the cell
+\end{tabular}
+\end{center}
 
 We use a simplified notation for the vertical concatenation of two vectors $\mathbf{a}$, $\mathbf{b}$: $\left[\mathbf{a}; \mathbf{b}\right]$ instead of $\left[ \mathbf{a}^{\text{T}} ; \mathbf{b}^{\text{T}} \right]^{\text{T}}$.
 
@@ -48,34 +65,34 @@ We use a simplified notation for the vertical concatenation of two vectors $\mat
 \paragraph{Input gate and input value.}
 
 \begin{align}
-a_{\iota}^{(t)} &= \mathbf{w}_{\iota}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
+a_{\iota}^{(t)} &= \underbrace{\mathbf{w}_{\iota}^{\text{T}}}_{1\times(N+2D+1)} \cdot \underbrace{\left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; \mathbf{s}^{(t-1)}; 1\right]}_{(N+2D+1)} \\
 g_{\iota}^{(t)} &= f_{\iota}\left(a_{\iota}^{(t)}\right)
 \end{align}
 
 \begin{align}
-a_{c}^{(t)} &= \mathbf{w}_{c}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; 1\right] \\
-z_{c}^{(t)} &= f_{c}\left(a_{c}^{(t)}\right)
+\mathbf{a}_{c}^{(t)} &= \underbrace{\mathbf{W}_{c}^{\text{T}}}_{D \times (N+D+1)} \cdot \underbrace{\left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; 1\right]}_{(N+D+1)} \\
+\mathbf{z}_{c}^{(t)} &= f_{c}\left(\mathbf{a}_{c}^{(t)}\right)
 \end{align}
 
 \paragraph{Forget gate.} This is actually a \emph{keep} gate:
 
 \begin{align}
-a_{\phi}^{(t)} &= \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t-1)}; 1\right] \\
+a_{\phi}^{(t)} &= \mathbf{w}_{\phi}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; \mathbf{s}^{(t-1)}; 1\right] \\
 g_{\phi}^{(t)} &= f_{\phi}\left(a_{\phi}^{(t)}\right)
 \end{align}
 
 \paragraph{Cell value.}
 
 \begin{equation}
-    s^{(t)} = g_{\phi}^{(t)} s^{(t-1)} + g_{\iota}^{(t)} z_{c}^{(t)}
+    \mathbf{s}^{(t)} = g_{\phi}^{(t)} \mathbf{s}^{(t-1)} + g_{\iota}^{(t)} \mathbf{z}_{c}^{(t)}
 \end{equation}
 
 \paragraph{Output gate and output value.}
 
 \begin{align}
-a_{\omega}^{(t)} &= \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; z_{h}^{(t-1)}; s^{(t)}; 1\right] \\
+a_{\omega}^{(t)} &= \mathbf{w}_{\omega}^{\text{T}} \cdot \left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; \mathbf{s}^{(t)}; 1\right] \\
 g_{\omega}^{(t)} &= f_{\omega}\left(a_{\omega}^{(t)}\right) \\
-z_h^{(t)} &= f_h\left(g_{\omega}^{(t)} s^{(t)}\right)
+\mathbf{z}_h^{(t)} &= f_h\left(g_{\omega}^{(t)} \mathbf{s}^{(t)}\right)
 \end{align}
 
 \subsection{The Backward Phase}
