@@ -213,13 +213,13 @@ $\mathbf{x}^{(t)}$ and with respect to $\mathbf{z}_h^{(t-1)}$:
 
 \begin{align}
      \boldsymbol{\delta}_{s}^{(t)} \overset{not.}{=}
-     \dfrac{\partial E}{\partial \boldsymbol{s}^{(t)}}
+     \dfrac{\partial E}{\partial \mathbf{s}^{(t)}}
   &&
      \boldsymbol{\delta}_{\mathbf{z}_c}^{(t)} \overset{not.}{=}
-     \dfrac{\partial E}{\partial \boldsymbol{z}_c^{(t)}}
+     \dfrac{\partial E}{\partial \mathbf{z}_c^{(t)}}
   &&
      \boldsymbol{\delta}_{\mathbf{z}_h}^{(t)} \overset{not.}{=}
-     \dfrac{\partial E}{\partial \boldsymbol{z}_h^{(t)}}
+     \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}}
 \end{align}
 
 \subsubsection*{Inner loops}
@@ -234,38 +234,38 @@ and $\mathbf{s}^{(t+1)}$).
 \begin{equation}
   \begin{split}
     \boldsymbol{\delta}_{s}^{(t)} \overset{not.}{=} \dfrac{\partial
-      E}{\partial \boldsymbol{s}^{(t)}} = & {\color{blue}
-      \dfrac{\partial E}{\partial \boldsymbol{z}_h^{(t)}}
+      E}{\partial \mathbf{s}^{(t)}} = & {\color{blue}
+      \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}}
       \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial
-        \boldsymbol{s}^{(t)}}} + {\color{auburn}\dfrac{\partial
+        \mathbf{s}^{(t)}}} + {\color{auburn}\dfrac{\partial
         E}{\partial g_{\phi}^{(t+1)}} \dfrac{\partial
-        g_{\phi}^{(t+1)}}{\partial \boldsymbol{s}^{(t)}} +
+        g_{\phi}^{(t+1)}}{\partial \mathbf{s}^{(t)}} +
       \dfrac{\partial E}{\partial g_{\iota}^{(t+1)}} \dfrac{\partial
-        g_{\iota}^{(t+1)}}{\partial \boldsymbol{s}^{(t)}} +
-      \dfrac{\partial E}{\partial \boldsymbol{s}^{(t+1)}}
-      \dfrac{\partial \boldsymbol{s}^{(t+1)}}{\partial
-        \boldsymbol{s}^{(t)}}}
+        g_{\iota}^{(t+1)}}{\partial \mathbf{s}^{(t)}} +
+      \dfrac{\partial E}{\partial \mathbf{s}^{(t+1)}}
+      \dfrac{\partial \mathbf{s}^{(t+1)}}{\partial
+        \mathbf{s}^{(t)}}}
     \\
     = & {\color{blue}
-      \dfrac{\partial E}{\partial \boldsymbol{z}_h^{(t)}}
-      \dfrac{\partial \boldsymbol{z}_h^{(t)}}{\partial
-        \left(g_w^{(t)} \boldsymbol{s}^{(t)} \right)}
+      \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}}
+      \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial
+        \left(g_w^{(t)} f_s \left(\mathbf{s}^{(t)} \right) \right)}
       \dfrac{\partial
-        \left(g_w^{(t)} \boldsymbol{s}^{(t)} \right)}
-      {\partial \boldsymbol{s}^{(t)}}
+        \left(g_w^{(t)} \mathbf{s}^{(t)} \right)}
+      {\partial \mathbf{s}^{(t)}}
     } \\ + & {\color{auburn}\dfrac{\partial
       E}{\partial g_{\phi}^{(t+1)}} \dfrac{\partial
-      g_{\phi}^{(t+1)}}{\partial \boldsymbol{s}^{(t)}} +
+      g_{\phi}^{(t+1)}}{\partial \mathbf{s}^{(t)}} +
     \dfrac{\partial E}{\partial g_{\iota}^{(t+1)}} \dfrac{\partial
-      g_{\iota}^{(t+1)}}{\partial \boldsymbol{s}^{(t)}} +
-    \dfrac{\partial E}{\partial \boldsymbol{s}^{(t+1)}}
-    \dfrac{\partial \boldsymbol{s}^{(t+1)}}{\partial
-      \boldsymbol{s}^{(t)}}}
+      g_{\iota}^{(t+1)}}{\partial \mathbf{s}^{(t)}} +
+    \dfrac{\partial E}{\partial \mathbf{s}^{(t+1)}}
+    \dfrac{\partial \mathbf{s}^{(t+1)}}{\partial
+      \mathbf{s}^{(t)}}}
   \\
   = & {\color{blue}
     \underbrace{\boldsymbol{\delta}_{\mathbf{z}_h}^{(t)}}_{1\times D}
-    \underbrace{\diag\left(f_{h}'\left(g_{\omega}^{(t)}\mathbf{s}^{(t)}\right)\right)}_{D\times D}
-    \underbrace{\left( g_{\omega}^{(t)} \mathbf{I}_{D} + f'_{\omega}\left(a_{\omega} \right) \boldsymbol{s}^{(t)}\mathbf{w}^{\text{T}}_{\omega, s} \right) }_{D \times D}} + \\
+    \underbrace{\diag\left(f_{h}'\left(g_{\omega}^{(t)} f_s\left(\mathbf{s}^{(t)}\right)\right)\right)}_{D\times D}
+    \underbrace{\left( g_{\omega}^{(t)} \diag\left(f_s'\left(\mathbf{s}^{(t)}\right) \right) + f'_{\omega}\left(a_{\omega} \right) f_s\left(\mathbf{s}^{(t)}\right)\mathbf{w}^{\text{T}}_{\omega, s} \right) }_{D \times D}} + \\
      & +
      {\color{auburn}\delta_{g_{\phi}}^{(t+1)}f_{\phi}'\left(a_{\phi}^{(t+1)}\right)\mathbf{w}_{\phi,
          s}^{\text{T}} +
@@ -277,18 +277,28 @@ and $\mathbf{s}^{(t+1)}$).
   \end{split}
 \end{equation}
 
+It's easier to understand the above matriceal expression by observing
+an element of the $1 \times D$ row vector ${\color{blue}
+      \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}}
+      \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial
+        \mathbf{s}^{(t)}}}$:
+
 \begin{equation}
-   {\color{blue}\boldsymbol{\delta}_s^{(t)\rightarrow(t+1)}[i] =
-  \displaystyle\sum_{j=1}
-      \dfrac{\partial E}{\partial \boldsymbol{z}_h^{(t)}[j]}
-      \dfrac{\partial \mathbf{z}_h^{(t)}[j]}{\partial
-        \boldsymbol{s}^{(t)}[i]}
-      = \displaystyle\sum_{j=1}
-      \dfrac{\partial E}{\partial \boldsymbol{z}_h^{(t)}[j]}
-      f_{h}'\left(g_{\omega}^{(t)}\mathbf{s}^{(t)}[i]\right)
-      \left( g_{\omega} \delta_{i,j} + \mathbf{s}^{(t)}[i]f'_{\omega}\left(a_{\omega}\right)\mathbf{w}_{\omega,s}[j] \right)}
+  \begin{split}
+    {\color{blue}\boldsymbol{\delta}_s^{(t)\rightarrow(t)}[i]} & =
+    \displaystyle\sum_{j=1}
+    \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}[j]}
+    \dfrac{\partial \mathbf{z}_h^{(t)}[j]}{\partial
+      \mathbf{s}^{(t)}[i]}
+      \\ & = \displaystyle\sum_{j=1}\left[
+      \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}[j]}
+      f_{h}'\left(g_{\omega}^{(t)}f_s\left(\mathbf{s}^{(t)}[j]\right)\right)
+      \left( g^{(t)}_{\omega} \delta_{i,j} f_s'\left(\mathbf{s}^{(t)}[i]\right) +
+        f_s\left(\mathbf{s}^{(t)}[j]\right)f'_{\omega}\left(a_{\omega}^{(t)}\right)\mathbf{w}_{\omega,s}[i] \right)\right]
+  \end{split}
 \end{equation}
 
+In the above expression $\delta_{i,j}$ is the Kronecker-Delta function.
 
 \subsubsection*{The objective of the backward phase}
 
@@ -315,8 +325,8 @@ $\boldsymbol{\delta}_{zz}^{(t)\rightarrow(t-1)}$.
 \subsubsection*{The gradients with respect to the output gate and its parameters}
 
 \begin{align}
-  \delta_{g_{\omega}}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial g_{\omega}^{(t)}} = \dfrac{\partial E}{\partial \mathbf{z}_{h}^{(t)}} \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial g_{\omega}^{(t)}} = \boldsymbol{\delta}_h^{(t)}\left(f_h'\left(g_{\omega}^{(t)}\mathbf{s}^{(t)}\right)\odot\mathbf{s}^{(t)}\right) \\
-  \boldsymbol{\delta}_{\omega}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \dfrac{\partial E}{\partial g_{\omega}^{(t)}} \dfrac{\partial g_{\omega}^{(t)}}{\partial \boldsymbol{w}_{\omega}^{(t)}} = \delta_{g_{\omega}}^{(t)} f_{\omega}'\left(a_{\omega}^{(t)}\right) \left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; \mathbf{s}^{(t)}; 1\right]
+  \delta_{g_{\omega}}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial g_{\omega}^{(t)}} = \dfrac{\partial E}{\partial \mathbf{z}_{h}^{(t)}} \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial g_{\omega}^{(t)}} = \boldsymbol{\delta}_{\mathbf{z}_h}^{(t)}\left(f_h'\left(g_{\omega}^{(t)}f_s\left(\mathbf{s}^{(t)}\right)\right)\odot\mathbf{s}^{(t)}\right) \\
+  \boldsymbol{\delta}_{\omega}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \mathbf{w}_{\omega}^{(t)}} = \dfrac{\partial E}{\partial g_{\omega}^{(t)}} \dfrac{\partial g_{\omega}^{(t)}}{\partial \mathbf{w}_{\omega}^{(t)}} = \delta_{g_{\omega}}^{(t)} f_{\omega}'\left(a_{\omega}^{(t)}\right) \left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; \mathbf{s}^{(t)}; 1\right]
 \end{align}
 
 \subsubsection*{The gradients with respect to the memory cell}
@@ -324,10 +334,14 @@ $\boldsymbol{\delta}_{zz}^{(t)\rightarrow(t-1)}$.
 \begin{align}
   \boldsymbol{\delta}_s^{(t)\rightarrow(t)}
   & \overset{\text{not.}}{=}
-    \dfrac{\partial E}{\partial \boldsymbol{z}_h^{(t)}}
-    \dfrac{\partial \boldsymbol{z}_h^{(t)}}{\boldsymbol{s}^{(t)}} =
-    \boldsymbol{\delta}_{h}^{(t)} \diag\left(f_{\omega}'\left(g_{\omega}^{(t)}\boldsymbol{s}^{(t)}\right)\right) g_{\omega}^{(t)} \\
-  & = g_{\omega}^{(t)}\boldsymbol{\delta}_h^{(t)} \odot f_{\omega}'\left(g_{\omega}^{(t)}\boldsymbol{s}^{(t)}\right)^{\text{T}} \\
+    \dfrac{\partial E}{\partial \mathbf{z}_h^{(t)}}
+    \dfrac{\partial \mathbf{z}_h^{(t)}}{\mathbf{s}^{(t)}}  \\
+  & = \boldsymbol{\delta}_{\mathbf{z}_h}^{(t)}
+    \diag\left(f_{h}'\left(g_{\omega}^{(t)} f_s\left(\mathbf{s}^{(t)}\right)\right)\right)
+    \left( g_{\omega}^{(t)} \diag\left(f_s'\left(\mathbf{s}^{(t)}\right) \right) + f'_{\omega}\left(a_{\omega} \right) f_s\left(\mathbf{s}^{(t)}\right)\mathbf{w}^{\text{T}}_{\omega, s} \right) \\
+  & = \left(\boldsymbol{\delta}_{\mathbf{z}_h}^{(t)} \odot
+    {f_{h}'\left(g_{\omega}^{(t)} f_s\left(\mathbf{s}^{(t)}\right)\right)}^{\text{T}}\right)
+    \left( g_{\omega}^{(t)} \diag\left(f_s'\left(\mathbf{s}^{(t)}\right) \right) + f'_{\omega}\left(a_{\omega} \right) f_s\left(\mathbf{s}^{(t)}\right)\mathbf{w}^{\text{T}}_{\omega, s} \right)\\
   \boldsymbol{\delta}_s^{(t)} &\overset{\text{not.}}{=} \boldsymbol{\delta}^{(t) \rightarrow (t)}_s + \boldsymbol{\delta}^{(t+1) \rightarrow (t)}_s
 \end{align}
 
@@ -335,20 +349,20 @@ $\boldsymbol{\delta}_{zz}^{(t)\rightarrow(t-1)}$.
   parameters}
 
 \begin{align}
-  \boldsymbol{\delta}_{\boldsymbol{z}_c}^{(t)}
+  \boldsymbol{\delta}_{\mathbf{z}_c}^{(t)}
   & \overset{\text{not.}}{=}
-    \dfrac{\partial E}{\partial \boldsymbol{z}_c^{(t)}} =
-    \dfrac{\partial E}{\partial \boldsymbol{s}^{(t)}}
-    \dfrac{\partial \boldsymbol{s}^{(t)}}{\partial \boldsymbol{z}_c^{(t)}} =
+    \dfrac{\partial E}{\partial \mathbf{z}_c^{(t)}} =
+    \dfrac{\partial E}{\partial \mathbf{s}^{(t)}}
+    \dfrac{\partial \mathbf{s}^{(t)}}{\partial \mathbf{z}_c^{(t)}} =
     \boldsymbol{\delta}_s^{(t)} \left(g_i^{(t)}\mathbf{I}_{D}\right)  =
      g_i^{(t)} \boldsymbol{\delta}_s^{(t)}
   \\
   \boldsymbol{\Delta}_{c}^{(t)}
   & \overset{\text{not.}}{=}
-    \dfrac{\partial E}{\partial \boldsymbol{W}_{c}^{(t)}} =
-    \dfrac{\partial E}{\partial \boldsymbol{z}_c^{(t)}}
-    \dfrac{\partial \boldsymbol{z}_c^{(t)}}{\partial \boldsymbol{a}_c^{(t)}}
-    \dfrac{\partial \boldsymbol{a}_c^{(t)}}{\partial \boldsymbol{W}_c^{(t)}} =
+    \dfrac{\partial E}{\partial \mathbf{W}_{c}^{(t)}} =
+    \dfrac{\partial E}{\partial \mathbf{z}_c^{(t)}}
+    \dfrac{\partial \mathbf{z}_c^{(t)}}{\partial \mathbf{a}_c^{(t)}}
+    \dfrac{\partial \mathbf{a}_c^{(t)}}{\partial \mathbf{W}_c^{(t)}} =
     \underbrace{\left({\boldsymbol{\delta}_{\mathbf{z}_c}^{(t)}}^{\text{T}} \odot f'_c\left(\mathbf{a}_c\right)\right)}_{D\times 1} \underbrace{\left[{\mathbf{x}^{(t)}}^{\text{T}}; {\mathbf{s}^{(t-1)}}^{\text{T}}; 1\right]}_{1 \times (N+D+1)}
 \end{align}
 
@@ -362,7 +376,7 @@ $\boldsymbol{\delta}_{zz}^{(t)\rightarrow(t-1)}$.
     \dfrac{\partial \mathbf{s}^{(t)}}{\partial g_{\iota}^{(t)}} =
     \boldsymbol{\delta}_s^{(t)} \mathbf{z}_c^{(t)}
   \\
-  \boldsymbol{\delta}_{\iota}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \dfrac{\partial E}{\partial g_{\iota}^{(t)}} \dfrac{\partial g_{\iota}^{(t)}}{\partial \boldsymbol{w}_{\iota}^{(t)}} = \delta_{g_{\iota}}^{(t)} f_{\iota}'\left(a_{\iota}^{(t)}\right) \left[{\mathbf{x}^{(t)}}^{\text{T}}; {\mathbf{z}_{h}^{(t-1)}}^{\text{T}}; {\mathbf{s}^{(t-1)}}^{\text{T}}; 1\right]
+  \boldsymbol{\delta}_{\iota}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \mathbf{w}_{\iota}^{(t)}} = \dfrac{\partial E}{\partial g_{\iota}^{(t)}} \dfrac{\partial g_{\iota}^{(t)}}{\partial \mathbf{w}_{\iota}^{(t)}} = \delta_{g_{\iota}}^{(t)} f_{\iota}'\left(a_{\iota}^{(t)}\right) \left[{\mathbf{x}^{(t)}}^{\text{T}}; {\mathbf{z}_{h}^{(t-1)}}^{\text{T}}; {\mathbf{s}^{(t-1)}}^{\text{T}}; 1\right]
 \end{align}
 
 \subsubsection*{The gradients with respect to the forget gate and its parameters}
@@ -375,7 +389,7 @@ $\boldsymbol{\delta}_{zz}^{(t)\rightarrow(t-1)}$.
     \dfrac{\partial \mathbf{s}^{(t)}}{\partial g_{\phi}^{(t)}} =
     \boldsymbol{\delta}_s^{(t)} \mathbf{s}^{(t-1)}
   \\
-  \boldsymbol{\delta}_{\phi}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \dfrac{\partial E}{\partial g_{\phi}^{(t)}} \dfrac{\partial g_{\phi}^{(t)}}{\partial \boldsymbol{w}_{\phi}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\phi}'\left(a_{\phi}^{(t)}\right) \left[{\mathbf{x}^{(t)}}^{\text{T}}; {\mathbf{z}_{h}^{(t-1)}}^{\text{T}}; {\mathbf{s}^{(t-1)}}^{\text{T}}; 1\right]
+  \boldsymbol{\delta}_{\phi}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \mathbf{w}_{\phi}^{(t)}} = \dfrac{\partial E}{\partial g_{\phi}^{(t)}} \dfrac{\partial g_{\phi}^{(t)}}{\partial \mathbf{w}_{\phi}^{(t)}} = \delta_{g_{\phi}}^{(t)} f_{\phi}'\left(a_{\phi}^{(t)}\right) \left[{\mathbf{x}^{(t)}}^{\text{T}}; {\mathbf{z}_{h}^{(t-1)}}^{\text{T}}; {\mathbf{s}^{(t-1)}}^{\text{T}}; 1\right]
 \end{align}
 
 \subsubsection*{The gradients with respect to incoming values}
