@@ -251,7 +251,7 @@ and $\mathbf{s}^{(t+1)}$).
       \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial
         \left(g_w^{(t)} f_s \left(\mathbf{s}^{(t)} \right) \right)}
       \dfrac{\partial
-        \left(g_w^{(t)} \mathbf{s}^{(t)} \right)}
+        \left(g_w^{(t)} f_s\left(\mathbf{s}^{(t)} \right)\right)}
       {\partial \mathbf{s}^{(t)}}
     } \\ + & {\color{auburn}\dfrac{\partial
       E}{\partial g_{\phi}^{(t+1)}} \dfrac{\partial
@@ -325,7 +325,7 @@ $\boldsymbol{\delta}_{zz}^{(t)\rightarrow(t-1)}$.
 \subsubsection*{The gradients with respect to the output gate and its parameters}
 
 \begin{align}
-  \delta_{g_{\omega}}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial g_{\omega}^{(t)}} = \dfrac{\partial E}{\partial \mathbf{z}_{h}^{(t)}} \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial g_{\omega}^{(t)}} = \boldsymbol{\delta}_{\mathbf{z}_h}^{(t)}\left(f_h'\left(g_{\omega}^{(t)}f_s\left(\mathbf{s}^{(t)}\right)\right)\odot\mathbf{s}^{(t)}\right) \\
+  \delta_{g_{\omega}}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial g_{\omega}^{(t)}} = \dfrac{\partial E}{\partial \mathbf{z}_{h}^{(t)}} \dfrac{\partial \mathbf{z}_h^{(t)}}{\partial g_{\omega}^{(t)}} = \underbrace{\boldsymbol{\delta}_{\mathbf{z}_h}^{(t)}}_{1 \times D}\left(\underbrace{f_h'\left(g_{\omega}^{(t)}f_s\left(\mathbf{s}^{(t)}\right)\right)}_{D \times 1} \odot \underbrace{f_s\left(\mathbf{s}^{(t)}\right)}_{D\times1}\right) \\
   \boldsymbol{\delta}_{\omega}^{(t)} &\overset{\text{not.}}{=} \dfrac{\partial E}{\partial \mathbf{w}_{\omega}^{(t)}} = \dfrac{\partial E}{\partial g_{\omega}^{(t)}} \dfrac{\partial g_{\omega}^{(t)}}{\partial \mathbf{w}_{\omega}^{(t)}} = \delta_{g_{\omega}}^{(t)} f_{\omega}'\left(a_{\omega}^{(t)}\right) \left[\mathbf{x}^{(t)}; \mathbf{z}_{h}^{(t-1)}; \mathbf{s}^{(t)}; 1\right]
 \end{align}
 
